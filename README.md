@@ -1,2 +1,2 @@
 # kotlinx-jdbc
-A simple JDBC wrapper in Kotlin. No magic
+A simple JDBC wrapper in Kotlin
