@@ -1,4 +1,4 @@
-package io.github.kotlinx.jdbc.core
+package io.github.kotlinx.jdbc.spi
 
 import java.sql.ResultSet
 

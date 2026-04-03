@@ -1,17 +1,20 @@
-package io.github.kotlinx.jdbc.internal
+package io.github.kotlinx.jdbc.internal.argument
 
-import io.github.kotlinx.jdbc.spi.sql.argument.SqlArgument
-import io.github.kotlinx.jdbc.spi.sql.argument.factory.SqlArgumentFactory
+import io.github.kotlinx.jdbc.spi.SqlArgument
+import io.github.kotlinx.jdbc.spi.SqlArgumentFactory
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
-class SqlArgumentRegistry {
+internal class SqlArgumentRegistry {
 
     private val factories = CopyOnWriteArrayList<SqlArgumentFactory>()
     private val cache = ConcurrentHashMap<Class<*>, SqlArgumentFactory>()
 
     init {
         register(EssentialArgumentFactory())
+        register(SqlTimeArgumentFactory())
+        register(JavaTimeArgumentFactory())
+        register(EnumArgumentFactory())
         register(LobArgumentFactory())
     }
 
@@ -32,7 +35,7 @@ class SqlArgumentRegistry {
         // 2. Build Argument
         // We enforce strictness here too: The factory claimed the type during lookup,
         // so it must return a valid Argument now.
-        return factory.build(value)
+        return factory.create(value)
             ?: throw IllegalStateException(
                 "Factory '${factory::class.simpleName}' claimed support for type '${value::class.simpleName}' " +
                         "but returned null during binding."
@@ -45,7 +48,7 @@ class SqlArgumentRegistry {
      */
     private fun findFactoryFor(value: Any): SqlArgumentFactory {
         for (factory in factories) {
-            if (factory.build(value) != null) {
+            if (factory.create(value) != null) {
                 return factory
             }
         }

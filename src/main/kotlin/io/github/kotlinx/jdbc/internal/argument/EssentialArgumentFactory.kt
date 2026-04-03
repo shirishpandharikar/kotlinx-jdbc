@@ -1,10 +1,10 @@
-package io.github.kotlinx.jdbc.internal
+package io.github.kotlinx.jdbc.internal.argument
 
-import io.github.kotlinx.jdbc.spi.sql.argument.SqlArgument
-import io.github.kotlinx.jdbc.spi.sql.argument.factory.SqlArgumentFactory
+import io.github.kotlinx.jdbc.spi.SqlArgument
+import io.github.kotlinx.jdbc.spi.SqlArgumentFactory
 
-class EssentialArgumentFactory: SqlArgumentFactory {
-    override fun build(value: Any): SqlArgument? {
+internal class EssentialArgumentFactory: SqlArgumentFactory {
+    override fun create(value: Any): SqlArgument? {
         return when (value) {
             is Boolean -> SqlArgument { position, pstmt -> pstmt.setBoolean(position, value) }
             is Byte -> SqlArgument { position, pstmt -> pstmt.setByte(position, value) }
