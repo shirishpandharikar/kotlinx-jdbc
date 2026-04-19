@@ -1,6 +1,9 @@
 package io.github.kotlinx.jdbc.internal.statement
 
 import io.github.kotlinx.jdbc.Handle
+import io.github.kotlinx.jdbc.internal.result.ResultIterable
+import io.github.kotlinx.jdbc.internal.result.ResultIterableImpl
+import io.github.kotlinx.jdbc.internal.result.ResultSetProducer
 import io.github.kotlinx.jdbc.spi.RowMapper
 import io.github.kotlinx.jdbc.statement.Update
 import java.sql.ResultSet
@@ -19,7 +22,7 @@ internal class UpdateImpl internal constructor (handle: Handle, sql: String): Ab
     override fun execute() = executeInternal { it.executeUpdate() }
 
     override fun <T> executeWithGeneratedKeys(vararg generateKeyColumns: String, mapper: RowMapper<T>): ResultIterable<T> {
-        getContext().useGeneratedKeys(*generateKeyColumns)
+        context.useGeneratedKeys(*generateKeyColumns)
         return ResultIterableImpl(mapper, resultProducer)
     }
 }

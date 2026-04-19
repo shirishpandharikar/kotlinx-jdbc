@@ -1,4 +1,4 @@
-package io.github.kotlinx.jdbc.internal.statement
+package io.github.kotlinx.jdbc.internal.result
 
 interface ResultIterable<T> {
     fun list(): List<T>

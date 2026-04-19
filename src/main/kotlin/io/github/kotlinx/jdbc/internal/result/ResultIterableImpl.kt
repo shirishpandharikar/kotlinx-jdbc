@@ -1,4 +1,4 @@
-package io.github.kotlinx.jdbc.internal.statement
+package io.github.kotlinx.jdbc.internal.result
 
 import io.github.kotlinx.jdbc.spi.RowMapper
 import kotlin.collections.buildList

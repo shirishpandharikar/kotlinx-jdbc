@@ -1,6 +1,9 @@
 package io.github.kotlinx.jdbc.internal.statement
 
 import io.github.kotlinx.jdbc.Handle
+import io.github.kotlinx.jdbc.internal.result.ResultIterable
+import io.github.kotlinx.jdbc.internal.result.ResultIterableImpl
+import io.github.kotlinx.jdbc.internal.result.ResultSetProducer
 import io.github.kotlinx.jdbc.spi.ColumnMapper
 import io.github.kotlinx.jdbc.spi.RowMapper
 import io.github.kotlinx.jdbc.statement.Query
@@ -20,7 +23,7 @@ internal class QueryImpl internal constructor(handle: Handle, sql: String): Abst
 
     override fun <T> map(columnIndex: Int, mapper: ColumnMapper<T>): ResultIterable<T> {
         val rowMapper: RowMapper<T> = { rs -> mapper.map(rs, columnIndex) }
-        return ResultIterableImpl( rowMapper, resultProducer)
+        return ResultIterableImpl(rowMapper, resultProducer)
     }
 
     override fun <T> map(columnLabel: String, mapper: ColumnMapper<T>): ResultIterable<T> {

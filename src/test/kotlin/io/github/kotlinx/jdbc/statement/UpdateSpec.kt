@@ -3,25 +3,28 @@ package io.github.kotlinx.jdbc.statement
 import io.github.kotlinx.jdbc.BaseSpec
 import io.github.kotlinx.test.User
 import io.github.kotlinx.test.UserStatus
+import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 
 class UpdateSpec: BaseSpec() {
 
     init {
-        should("update user with id 1 and set status INACTIVE") {
+        should("update user with id 3 and set status INACTIVE") {
             val rows = dbi.withHandle {
                 update("UPDATE users SET status = ? WHERE id = ?")
                     .bind(1, "INACTIVE")
-                    .bind(2, 1L)
+                    .bind(2, 3L)
                     .execute()
             }
             rows shouldBe 1
         }
 
-        should("delete user with id 2") {
+        should("update user with id 3") {
             val rows = dbi.withHandle {
-                update("DELETE FROM users WHERE id = ?")
-                    .bind(1, 2L)
+                update("UPDATE users SET name = ? WHERE id = ?")
+                    .bind(1, "Charlie Davis")
+                    .bind(2, 3L)
                     .execute()
             }
             rows shouldBe 1
@@ -42,7 +45,12 @@ class UpdateSpec: BaseSpec() {
                         )
                     }.first()
             }
-            println(result)
+            assertSoftly(result) {
+                id.shouldNotBeNull()
+                name shouldBe "Emily"
+                status shouldBe UserStatus.ACTIVE
+                age shouldBe 28
+            }
         }
     }
 

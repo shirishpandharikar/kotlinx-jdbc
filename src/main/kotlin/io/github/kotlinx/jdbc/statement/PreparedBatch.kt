@@ -4,9 +4,8 @@ import io.github.kotlinx.jdbc.internal.result.ResultIterable
 import io.github.kotlinx.jdbc.internal.statement.SqlStatement
 import io.github.kotlinx.jdbc.spi.RowMapper
 
-interface Update : SqlStatement<Update> {
-    fun execute(): Int
+interface PreparedBatch: SqlStatement<PreparedBatch> {
+    fun add(): PreparedBatch
+    fun execute(): IntArray
     fun <T> executeWithGeneratedKeys(vararg generateKeyColumns: String, mapper: RowMapper<T>): ResultIterable<T>
 }
-
-

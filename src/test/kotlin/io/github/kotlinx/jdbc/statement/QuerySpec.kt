@@ -25,15 +25,15 @@ class QuerySpec : BaseSpec() {
         should("find a user by id") {
             val user = dbi.withHandle {
                 query("SELECT id, name, status, age FROM users WHERE id = ?")
-                    .bind(1, 1L)
+                    .bind(1, 3L)
                     .map(userMapper)
                     .first()
             }
             assertSoftly(user) {
-                id shouldBe 1L
-                name shouldBe "Alice"
+                id shouldBe 3L
+                name shouldBe "Charlie"
                 status shouldBe UserStatus.ACTIVE
-                age shouldBe 30
+                age shouldBe 35
             }
         }
 
