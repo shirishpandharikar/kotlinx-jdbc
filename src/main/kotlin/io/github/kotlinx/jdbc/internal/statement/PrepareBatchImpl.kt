@@ -9,13 +9,13 @@ import io.github.kotlinx.jdbc.spi.SqlArgument
 import io.github.kotlinx.jdbc.statement.PreparedBatch
 import java.sql.PreparedStatement
 import java.sql.ResultSet
-import java.util.TreeMap
+import java.util.*
 
 internal class PrepareBatchImpl internal constructor(handle: Handle, sql: String): AbstractSqlStatement<PreparedBatch>(handle, sql), PreparedBatch {
 
     private val batches = mutableListOf<BatchRow>()
 
-    private data class BatchRow(val positional: TreeMap<Int, SqlArgument>)
+    private data class BatchRow(val params: TreeMap<Int, SqlArgument>)
 
     private val resultProducer = object: ResultSetProducer {
         override fun <R> withResultSet(block: (ResultSet) -> R): R {
@@ -27,8 +27,15 @@ internal class PrepareBatchImpl internal constructor(handle: Handle, sql: String
     }
 
     override fun add(): PreparedBatch {
-        batches.add(BatchRow(TreeMap(positionalParams)))
-        positionalParams.clear()
+        if (bindings.isEmpty()) {
+            throw IllegalStateException(
+                "Attempt to add() an empty batch, you probably didn't mean to do this "
+                        + "- call add() *after* setting batch parameters"
+            )
+        }
+        val resolvedParams = resolveParameters()
+        batches.add(BatchRow(resolvedParams))
+        bindings.clear()
         return this
     }
 
@@ -43,7 +50,7 @@ internal class PrepareBatchImpl internal constructor(handle: Handle, sql: String
 
     override fun applyQueryParameters(preparedStatement: PreparedStatement) {
         batches.forEach { batch ->
-            batch.positional.forEach { (i, binding) ->
+            batch.params.forEach { (i, binding) ->
                 binding.apply(i, preparedStatement)
             }
             preparedStatement.addBatch()

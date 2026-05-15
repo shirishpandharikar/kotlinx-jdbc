@@ -74,6 +74,36 @@ class QuerySpec : BaseSpec() {
                 size shouldBeGreaterThanOrEqual 2
             }
         }
+
+        should("find a user by named parameter id") {
+            val user = dbi.withHandle {
+                query("SELECT id, name, status, age FROM users WHERE id = :id")
+                    .bind("id", 3L)
+                    .map(userMapper)
+                    .first()
+            }
+            assertSoftly(user) {
+                id shouldBe 3L
+                name shouldBe "Charlie"
+                status shouldBe UserStatus.ACTIVE
+                age shouldBe 35
+            }
+        }
+
+        should("find all users with named parameter status 'ACTIVE'") {
+
+            val users = dbi.withHandle {
+                query("SELECT id, name, status, age FROM users WHERE status = :status")
+                    .bind("status", "ACTIVE")
+                    .map(userMapper)
+                    .list()
+            }
+
+            assertSoftly(users) {
+                shouldNotBeEmpty()
+                size shouldBeGreaterThanOrEqual 2
+            }
+        }
     }
 
 }

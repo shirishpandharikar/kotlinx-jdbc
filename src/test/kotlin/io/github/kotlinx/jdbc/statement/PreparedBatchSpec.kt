@@ -40,6 +40,21 @@ class PreparedBatchSpec : BaseSpec() {
             generatedIds.size shouldBe 2
         }
 
+        should("execute prepared batch insert with named parameter binding") {
+            val rowsInserted = dbi.withHandle {
+                preparedBatch("INSERT INTO users (name, status, age) VALUES (:name, :status, :age)")
+                    .bind("name", "Susan")
+                    .bind("status", "ACTIVE")
+                    .bind("age", 40)
+                    .add()
+                    .bind("name", "Jacqueline")
+                    .bind("status", "INACTIVE")
+                    .bind("age", 45)
+                    .add()
+                    .execute()
+            }
+            rowsInserted.size shouldBe 2
+        }
     }
 
 }
