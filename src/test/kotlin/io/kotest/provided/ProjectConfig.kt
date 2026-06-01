@@ -8,7 +8,7 @@ import javax.sql.DataSource
 
 object ProjectConfig : AbstractProjectConfig() {
 
-    private const val IMAGE_NAME = "postgres:18.3-alpine3.23"
+    private const val IMAGE_NAME = "postgres:18.4-alpine3.23"
 
     private val postgres = PostgreSQLContainer(IMAGE_NAME).apply {
         withDatabaseName("testdb")

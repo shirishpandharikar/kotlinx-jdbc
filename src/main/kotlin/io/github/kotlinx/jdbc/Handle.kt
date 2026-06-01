@@ -10,11 +10,14 @@ import io.github.kotlinx.jdbc.statement.Batch
 import io.github.kotlinx.jdbc.statement.PreparedBatch
 import io.github.kotlinx.jdbc.statement.Query
 import io.github.kotlinx.jdbc.statement.Update
+import io.github.kotlinx.jdbc.tx.TransactionContext
+import io.github.kotlinx.jdbc.tx.TransactionOptions
 import java.sql.Connection
 
 class Handle(private val kdbi: Kdbi): AutoCloseable {
 
     private var _connection: Connection? = null
+    private var txContext: TransactionContext? = null
 
     fun getConnection(): Connection = _connection ?: kdbi.dataSource.connection.also { _connection = it }
 
@@ -23,8 +26,36 @@ class Handle(private val kdbi: Kdbi): AutoCloseable {
     fun batch(): Batch = BatchImpl(this)
     fun preparedBatch(sql: String): PreparedBatch = PrepareBatchImpl(this, sql)
 
-    fun <R> withTransaction(block: Handle.() -> R): R = TODO("Not implemented yet")
-    fun useTransaction(block: Handle.() -> Unit) = withTransaction { block() }
+    fun <R> inTransaction(block: Handle.() -> R): R = inTransaction(TransactionOptions(), block)
+
+    fun <R> inTransaction(options: TransactionOptions, block: Handle.() -> R): R {
+        val conn = getConnection()
+        val context = txContext ?: TransactionContext().also { txContext = it }
+        context.begin(conn, options)
+        try {
+            val result = this.block()
+            context.commit(conn)
+            return result
+        } catch (ex: Throwable) {
+            val shouldRollback = options.shouldRollback(ex)
+            try {
+                if (shouldRollback) {
+                    context.rollback(conn)
+                } else {
+                    context.commit(conn)
+                }
+            } catch (re: Exception) {
+                ex.addSuppressed(re)
+            }
+            throw ex
+        } finally {
+            context.end(conn)
+        }
+    }
+
+    fun useTransaction(block: Handle.() -> Unit) = inTransaction { block() }
+
+    fun useTransaction(options: TransactionOptions, block: Handle.() -> Unit) = inTransaction(options) { block() }
 
     override fun close() {
         _connection?.close()
