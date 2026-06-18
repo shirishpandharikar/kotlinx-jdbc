@@ -1,7 +1,6 @@
 package io.github.kotlinx.jdbc.internal.result
 
 import io.github.kotlinx.jdbc.spi.RowMapper
-import kotlin.collections.buildList
 
 internal class ResultIterableImpl<T>(private val mapper: RowMapper<T>, private val resultSetProducer: ResultSetProducer) : ResultIterable<T> {
 
@@ -36,12 +35,17 @@ internal class ResultIterableImpl<T>(private val mapper: RowMapper<T>, private v
         }
     }
 
-    override fun <K> associateBy(keySelector: (T) -> K): Map<K, T> {
-        TODO("Not yet implemented")
-    }
+    override fun <K> associateBy(keySelector: (T) -> K): Map<K, T> = associateBy(keySelector) { it }
 
     override fun <K, V> associateBy(keySelector: (T) -> K, valueTransform: (T) -> V): Map<K, V> {
-        TODO("Not yet implemented")
+        return resultSetProducer.withResultSet {
+            buildMap {
+                while (it.next()) {
+                    val item = mapper.map(it)
+                    put(keySelector(item), valueTransform(item))
+                }
+            }
+        }
     }
 
     private inline fun checkElement(value: Boolean, lazyMessage: () -> Any) {

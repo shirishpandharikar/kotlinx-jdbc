@@ -7,6 +7,7 @@ import io.github.kotlinx.test.UserStatus
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
+import io.kotest.matchers.maps.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 
 class QuerySpec : BaseSpec() {
@@ -72,6 +73,38 @@ class QuerySpec : BaseSpec() {
             assertSoftly(users) {
                 shouldNotBeEmpty()
                 size shouldBeGreaterThanOrEqual 2
+            }
+        }
+
+        should("associate user by id") {
+            val result = dbi.withHandle {
+                query("SELECT id, name, status, age FROM users WHERE id = ?")
+                    .bind(1, 3L)
+                    .map(userMapper)
+                    .associateBy { it.id }
+            }
+            assertSoftly(result) {
+                shouldNotBeEmpty()
+                size shouldBe 1
+                assertSoftly(getValue(3L)) {
+                    name shouldBe "Charlie"
+                    status shouldBe UserStatus.ACTIVE
+                    age shouldBe 35
+                }
+            }
+        }
+
+        should("associate user by id with name value") {
+            val result = dbi.withHandle {
+                query("SELECT id, name, status, age FROM users WHERE id = ?")
+                    .bind(1, 3L)
+                    .map(userMapper)
+                    .associateBy({ it.id }, { it.name })
+            }
+            assertSoftly(result) {
+                shouldNotBeEmpty()
+                size shouldBe 1
+                getValue(3L) shouldBe "Charlie"
             }
         }
 
