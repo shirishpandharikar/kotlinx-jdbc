@@ -6,7 +6,7 @@ import java.sql.Date
 import java.sql.Time
 import java.sql.Timestamp
 
-class SqlTimeArgumentFactory: SqlArgumentFactory {
+internal class SqlTimeArgumentFactory: SqlArgumentFactory {
     override fun create(value: Any): SqlArgument? {
         return when (value) {
             is Timestamp -> SqlArgument { position, pstmt -> pstmt.setTimestamp(position, value) }

@@ -12,7 +12,7 @@ import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.ZonedDateTime
 
-class JavaTimeArgumentFactory : SqlArgumentFactory {
+internal class JavaTimeArgumentFactory : SqlArgumentFactory {
     override fun create(value: Any): SqlArgument? {
         return when (value) {
             is Instant -> SqlArgument { position, pstmt -> pstmt.setTimestamp(position, Timestamp.from(value)) }
