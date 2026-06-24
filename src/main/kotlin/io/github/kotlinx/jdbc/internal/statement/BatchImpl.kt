@@ -4,7 +4,7 @@ import io.github.kotlinx.jdbc.Handle
 import io.github.kotlinx.jdbc.internal.statement.ctx.StatementContext
 import io.github.kotlinx.jdbc.statement.Batch
 
-class BatchImpl(private val handle: Handle): Batch {
+internal class BatchImpl(private val handle: Handle): Batch {
 
     private val sqls = mutableListOf<String>()
 
