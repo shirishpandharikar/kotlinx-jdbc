@@ -2,6 +2,7 @@ package io.github.kotlinx.jdbc.internal.argument
 
 import io.github.kotlinx.jdbc.spi.SqlArgument
 import io.github.kotlinx.jdbc.spi.SqlArgumentFactory
+import java.math.BigDecimal
 
 internal class EssentialArgumentFactory: SqlArgumentFactory {
     override fun create(value: Any): SqlArgument? {
@@ -14,6 +15,8 @@ internal class EssentialArgumentFactory: SqlArgumentFactory {
             is String -> SqlArgument { position, pstmt -> pstmt.setString(position, value) }
             is Long -> SqlArgument { position, pstmt -> pstmt.setLong(position, value) }
             is Double -> SqlArgument { position, pstmt -> pstmt.setDouble(position, value) }
+            is Float -> SqlArgument { position, pstmt -> pstmt.setFloat(position, value) }
+            is BigDecimal -> SqlArgument { position, pstmt -> pstmt.setBigDecimal(position, value) }
             else -> null
         }
     }
