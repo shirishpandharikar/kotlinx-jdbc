@@ -5,10 +5,12 @@ import io.github.kotlinx.jdbc.spi.RowMapper
 import io.github.kotlinx.test.User
 import io.github.kotlinx.test.UserStatus
 import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.maps.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 
 class QuerySpec : BaseSpec() {
 
@@ -137,6 +139,76 @@ class QuerySpec : BaseSpec() {
                 size shouldBeGreaterThanOrEqual 2
             }
         }
-    }
 
+        context("positional parameter validation") {
+
+            should("throw when position index is zero") {
+                shouldThrow<IllegalArgumentException> {
+                    dbi.withHandle {
+                        query("SELECT id FROM users WHERE id = ?")
+                            .bind(0, 1L)
+                            .map(userMapper)
+                            .list()
+                    }
+                }.message shouldContain "Positional parameter index must be >= 1, got 0"
+            }
+
+            should("throw when position index is negative") {
+                shouldThrow<IllegalArgumentException> {
+                    dbi.withHandle {
+                        query("SELECT id FROM users WHERE id = ?")
+                            .bind(-1, 1L)
+                            .map(userMapper)
+                            .list()
+                    }
+                }.message shouldContain "Positional parameter index must be >= 1, got -1"
+            }
+
+            should("throw when bound count is less than placeholder count") {
+                shouldThrow<IllegalArgumentException> {
+                    dbi.withHandle {
+                        query("SELECT id FROM users WHERE id = ? AND age = ?")
+                            .bind(1, 1L)
+                            .map(userMapper)
+                            .list()
+                    }
+                }.message shouldContain "Expected 2 positional parameter(s) but got 1"
+            }
+
+            should("throw when bound count is greater than placeholder count") {
+                shouldThrow<IllegalArgumentException> {
+                    dbi.withHandle {
+                        query("SELECT id FROM users WHERE id = ?")
+                            .bind(1, 1L)
+                            .bind(2, 99L)
+                            .map(userMapper)
+                            .list()
+                    }
+                }.message shouldContain "Expected 1 positional parameter(s) but got 2"
+            }
+
+            should("throw when position index is out of range") {
+                shouldThrow<IllegalArgumentException> {
+                    dbi.withHandle {
+                        query("SELECT id FROM users WHERE id = ?")
+                            .bind(5, 1L)
+                            .map(userMapper)
+                            .list()
+                    }
+                }.message shouldContain "Missing positional parameter at index 1"
+            }
+
+            should("throw when there is a gap in positional indices") {
+                shouldThrow<IllegalArgumentException> {
+                    dbi.withHandle {
+                        query("SELECT id FROM users WHERE id = ? AND age = ?")
+                            .bind(1, 1L)
+                            .bind(3, 25)
+                            .map(userMapper)
+                            .list()
+                    }
+                }.message shouldContain "Missing positional parameter at index 2"
+            }
+        }
+    }
 }

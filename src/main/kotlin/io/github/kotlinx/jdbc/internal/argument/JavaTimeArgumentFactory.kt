@@ -18,9 +18,9 @@ internal class JavaTimeArgumentFactory : SqlArgumentFactory {
             is Instant -> SqlArgument { position, pstmt -> pstmt.setTimestamp(position, Timestamp.from(value)) }
             is LocalDate -> SqlArgument { position, pstmt -> pstmt.setDate(position, Date.valueOf(value)) }
             is LocalTime -> SqlArgument { position, pstmt -> pstmt.setTime(position, Time.valueOf(value)) }
-            is LocalDateTime -> SqlArgument { position, pstmt -> pstmt.setTimestamp(position, Timestamp.valueOf(value)) }
-            is OffsetDateTime -> SqlArgument { position, pstmt -> pstmt.setTimestamp(position, Timestamp.from(value.toInstant()))}
-            is ZonedDateTime -> SqlArgument { position, pstmt -> pstmt.setTimestamp(position, Timestamp.from(value.toInstant())) }
+            is LocalDateTime -> SqlArgument { position, pstmt -> pstmt.setObject(position, value) }
+            is OffsetDateTime -> SqlArgument { position, pstmt -> pstmt.setObject(position, value) }
+            is ZonedDateTime -> SqlArgument { position, pstmt -> pstmt.setObject(position, value.toOffsetDateTime()) }
             else -> null
         }
     }

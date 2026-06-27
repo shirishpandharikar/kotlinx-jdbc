@@ -3,6 +3,8 @@ package io.github.kotlinx.jdbc
 import io.github.kotlinx.jdbc.internal.argument.SqlArgumentRegistry
 import io.github.kotlinx.jdbc.internal.statement.factory.StatementCreator
 import io.github.kotlinx.jdbc.internal.statement.factory.StatementCreatorFactory
+import io.github.kotlinx.jdbc.internal.statement.named.NamedParameterParser
+import io.github.kotlinx.jdbc.internal.statement.named.cache.ParsedSqlCache
 import io.github.kotlinx.jdbc.tx.TransactionOptions
 import javax.sql.DataSource
 
@@ -10,6 +12,7 @@ class Kdbi(internal val dataSource: DataSource) {
 
     private val sqlArgumentRegistry = SqlArgumentRegistry()
     private val statementCreatorFactory = StatementCreatorFactory()
+    private val parsedSqlCache = ParsedSqlCache(maxSize = ParsedSqlCache.DEFAULT_MAX_SIZE, parser = NamedParameterParser::parse)
 
     /**
      * Executes the given block returns the result.
@@ -62,4 +65,5 @@ class Kdbi(internal val dataSource: DataSource) {
 
     internal fun sqlArgumentRegistry(): SqlArgumentRegistry = sqlArgumentRegistry
     internal fun statementCreator(): StatementCreator = statementCreatorFactory
+    internal fun parsedSqlCache(): ParsedSqlCache = parsedSqlCache
 }

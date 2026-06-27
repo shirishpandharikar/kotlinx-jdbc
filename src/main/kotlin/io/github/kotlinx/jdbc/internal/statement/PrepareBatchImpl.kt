@@ -9,13 +9,12 @@ import io.github.kotlinx.jdbc.spi.SqlArgument
 import io.github.kotlinx.jdbc.statement.PreparedBatch
 import java.sql.PreparedStatement
 import java.sql.ResultSet
-import java.util.*
 
 internal class PrepareBatchImpl internal constructor(handle: Handle, sql: String): AbstractSqlStatement<PreparedBatch>(handle, sql), PreparedBatch {
 
     private val batches = mutableListOf<BatchRow>()
 
-    private data class BatchRow(val params: TreeMap<Int, SqlArgument>)
+    private data class BatchRow(val params: Map<Int, SqlArgument>)
 
     private val resultProducer = object: ResultSetProducer {
         override fun <R> withResultSet(block: (ResultSet) -> R): R {

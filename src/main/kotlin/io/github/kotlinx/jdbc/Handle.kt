@@ -6,6 +6,7 @@ import io.github.kotlinx.jdbc.internal.statement.PrepareBatchImpl
 import io.github.kotlinx.jdbc.internal.statement.QueryImpl
 import io.github.kotlinx.jdbc.internal.statement.UpdateImpl
 import io.github.kotlinx.jdbc.internal.statement.factory.StatementCreator
+import io.github.kotlinx.jdbc.internal.statement.named.cache.ParsedSqlCache
 import io.github.kotlinx.jdbc.statement.Batch
 import io.github.kotlinx.jdbc.statement.PreparedBatch
 import io.github.kotlinx.jdbc.statement.Query
@@ -64,4 +65,5 @@ class Handle(private val kdbi: Kdbi): AutoCloseable {
 
     internal fun sqlArgumentRegistry(): SqlArgumentRegistry = kdbi.sqlArgumentRegistry()
     internal fun statementCreator(): StatementCreator = kdbi.statementCreator()
+    internal fun parsedSqlCache() : ParsedSqlCache = kdbi.parsedSqlCache()
 }

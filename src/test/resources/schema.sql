@@ -9,6 +9,17 @@ CREATE TABLE IF NOT EXISTS users
 
 CREATE INDEX IF NOT EXISTS idx_users_status ON users (status);
 
+CREATE TABLE IF NOT EXISTS time_entries
+(
+    id                  SERIAL PRIMARY KEY,
+    instant_col         TIMESTAMPTZ,
+    local_date_col      DATE,
+    local_time_col      TIME,
+    local_datetime_col  TIMESTAMP,
+    offset_datetime_col TIMESTAMPTZ,
+    zoned_datetime_col  TIMESTAMPTZ
+);
+
 CREATE TABLE IF NOT EXISTS departments
 (
     id   SERIAL PRIMARY KEY,
