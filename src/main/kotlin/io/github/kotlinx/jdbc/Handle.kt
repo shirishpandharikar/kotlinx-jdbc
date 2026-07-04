@@ -15,7 +15,7 @@ import io.github.kotlinx.jdbc.tx.TransactionContext
 import io.github.kotlinx.jdbc.tx.TransactionOptions
 import java.sql.Connection
 
-class Handle(private val kdbi: Kdbi): AutoCloseable {
+class Handle internal constructor(private val kdbi: Kdbi): AutoCloseable {
 
     private var _connection: Connection? = null
     private var txContext: TransactionContext? = null
