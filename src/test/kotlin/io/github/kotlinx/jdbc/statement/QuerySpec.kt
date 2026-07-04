@@ -142,6 +142,39 @@ class QuerySpec : BaseSpec() {
             }
         }
 
+        should("one() throws TooManyRowsException when more than one row") {
+            shouldThrow<TooManyRowsException> {
+                dbi.withHandle {
+                    query("SELECT id, name, status, age FROM users").map(userMapper).one()
+                }
+            }
+        }
+
+        should("one() throws EmptyResultException when no rows") {
+            shouldThrow<EmptyResultException> {
+                dbi.withHandle {
+                    query("SELECT id, name, status, age FROM users WHERE id = ?")
+                        .bind(1, 9999L).map(userMapper).one()
+                }
+            }
+        }
+
+        should("oneOrNull() throws TooManyRowsException when more than one row") {
+            shouldThrow<TooManyRowsException> {
+                dbi.withHandle {
+                    query("SELECT id, name, status, age FROM users").map(userMapper).one()
+                }
+            }
+        }
+
+        should("oneOrNull() returns null when no rows") {
+            val result = dbi.withHandle {
+                query("SELECT id, name, status, age FROM users WHERE id = ?")
+                    .bind(1, 9999L).map(userMapper).oneOrNull()
+            }
+            result shouldBe null
+        }
+
         context("positional parameter validation") {
 
             should("throw when position index is zero") {
@@ -210,39 +243,6 @@ class QuerySpec : BaseSpec() {
                             .list()
                     }
                 }.message shouldContain "Missing positional parameter at index 2"
-            }
-
-            should("one() throws TooManyRowsException when more than one row") {
-                shouldThrow<TooManyRowsException> {
-                    dbi.withHandle {
-                        query("SELECT id, name, status, age FROM users").map(userMapper).one()
-                    }
-                }
-            }
-
-            should("one() throws EmptyResultException when no rows") {
-                shouldThrow<EmptyResultException> {
-                    dbi.withHandle {
-                        query("SELECT id, name, status, age FROM users WHERE id = ?")
-                            .bind(1, 9999L).map(userMapper).one()
-                    }
-                }
-            }
-
-            should("oneOrNull() throws TooManyRowsException when more than one row") {
-                shouldThrow<TooManyRowsException> {
-                    dbi.withHandle {
-                        query("SELECT id, name, status, age FROM users").map(userMapper).one()
-                    }
-                }
-            }
-
-            should("oneOrNull() returns null when no rows") {
-                val result = dbi.withHandle {
-                    query("SELECT id, name, status, age FROM users WHERE id = ?")
-                        .bind(1, 9999L).map(userMapper).oneOrNull()
-                }
-                result shouldBe null
             }
         }
     }
