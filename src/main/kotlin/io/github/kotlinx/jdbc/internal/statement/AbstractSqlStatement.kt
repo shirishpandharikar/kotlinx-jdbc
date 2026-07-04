@@ -45,7 +45,7 @@ internal abstract class AbstractSqlStatement<S : SqlStatement<S>>(handle: Handle
     }
 
     protected open fun createStatement(parsedSql: String): PreparedStatement {
-        return statementCreator.createPreparedStatement(connection, parsedSql, context)
+        return statementCreator.createPreparedStatement(handle.getConnection(), parsedSql, context)
     }
 
     protected open fun applyQueryParameters(preparedStatement: PreparedStatement) {

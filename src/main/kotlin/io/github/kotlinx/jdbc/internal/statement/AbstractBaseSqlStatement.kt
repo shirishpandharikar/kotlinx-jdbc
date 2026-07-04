@@ -8,13 +8,10 @@ import io.github.kotlinx.jdbc.spi.SqlArgument
 internal abstract class AbstractBaseSqlStatement<S : SqlStatement<S>>(protected val handle: Handle, protected val sql: String) : SqlStatement<S> {
     protected val registry = handle.sqlArgumentRegistry()
     protected val statementCreator = handle.statementCreator()
-    protected val connection = handle.getConnection()
     protected val context = StatementContext()
     protected val bindings = Bindings()
 
-    protected val parsedSql: ParsedSql by lazy {
-        handle.parsedSqlCache().get(sql)
-    }
+    protected val parsedSql: ParsedSql by lazy { handle.parsedSqlCache().get(sql) }
 
     /**
      * Builds a map of 1-based JDBC positions to [SqlArgument]s, ready to be applied
