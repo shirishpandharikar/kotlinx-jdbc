@@ -4,17 +4,15 @@ package io.github.kotlinx.jdbc.result
  * A lazy, single-use view over the rows of an executed SQL statement.
  *
  * A [ResultIterable] does not execute anything on creation. Instead, each **terminal
- * operation** (such as [list], [first], [associateBy] triggers
+ * operation** such as [list], [first], [associateBy] triggers
  * execution of the underlying statement, iterates the resulting [java.sql.ResultSet], and
  * closes it before returning.
  *
- * ### Single-use semantics
  * A [ResultIterable] is backed by a live database cursor and is intended to be consumed by
  * **exactly one** terminal operation. Invoking a second terminal operation on the same
  * instance is not supported and will fail fast. To read the data again, re-run the query to
  * obtain a fresh [ResultIterable].
  *
- * ### Mapping
  * Each row is converted to [T] by the [io.github.kotlinx.jdbc.spi.RowMapper] (or
  * [io.github.kotlinx.jdbc.spi.ColumnMapper]) supplied when the result was created.
  *
@@ -31,16 +29,19 @@ interface ResultIterable<T> {
      * @throws java.sql.SQLException if statement execution or row mapping fails
      */
     fun list(): List<T>
+
     /**
      * Executes the statement and returns the **first** row, ignoring any remaining rows.
      *
      * Use this when "the first row" is sufficient and additional rows should be discarded.
+     * To assert that the result contains a single row, use [one] instead.
      *
      * @return the first mapped row
      * @throws io.github.kotlinx.jdbc.exception.EmptyResultException if the result has no rows
      * @throws java.sql.SQLException if statement execution or row mapping fails
      */
     fun first(): T
+
     /**
      * Executes the statement and returns the **first** row, or `null` if the result is empty.
      *
@@ -51,6 +52,38 @@ interface ResultIterable<T> {
      * @throws java.sql.SQLException if statement execution or row mapping fails
      */
     fun firstOrNull(): T?
+
+    /**
+     * Executes the statement and returns **exactly one** row.
+     *
+     * Unlike [first], this enforces that the result contains a single row: an empty result
+     * or a result with more than one row is treated as an error. At most two rows are read
+     * from the cursor to detect the "more than one" case.
+     *
+     * @return the single mapped row
+     * @throws io.github.kotlinx.jdbc.exception.EmptyResultException if the result has no rows
+     * @throws io.github.kotlinx.jdbc.exception.TooManyRowsException if the result has more than one row
+     * @throws java.sql.SQLException if statement execution or row mapping fails
+     * @see oneOrNull
+     * @see first
+     */
+    fun one(): T
+
+    /**
+     * Executes the statement and returns **at most one** row, or `null` if the result is empty.
+     *
+     * Like [one], more than one row is treated as an error, but an empty result yields `null`
+     * rather than throwing. At most two rows are read from the cursor to detect the
+     * "more than one" case.
+     *
+     * @return the single mapped row, or `null` if the result has no rows
+     * @throws io.github.kotlinx.jdbc.exception.TooManyRowsException if the result has more than one row
+     * @throws java.sql.SQLException if statement execution or row mapping fails
+     * @see one
+     * @see firstOrNull
+     */
+    fun oneOrNull(): T?
+
     /**
      * Executes the statement and returns a [Map] of rows keyed by [keySelector].
      *
@@ -64,6 +97,7 @@ interface ResultIterable<T> {
      * @throws java.sql.SQLException if statement execution or row mapping fails
      */
     fun <K> associateBy(keySelector: (T) -> K): Map<K, T>
+
     /**
      * Executes the statement and returns a [Map] keyed by [keySelector] with values produced
      * by [valueTransform].
