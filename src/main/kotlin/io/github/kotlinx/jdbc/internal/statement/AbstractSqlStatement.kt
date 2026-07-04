@@ -1,8 +1,10 @@
 package io.github.kotlinx.jdbc.internal.statement
 
 import io.github.kotlinx.jdbc.Handle
+import io.github.kotlinx.jdbc.internal.result.ResultSetProducer
 import io.github.kotlinx.jdbc.spi.SqlArgument
 import java.sql.PreparedStatement
+import java.sql.ResultSet
 
 internal abstract class AbstractSqlStatement<S : SqlStatement<S>>(handle: Handle, sql: String) : AbstractBaseSqlStatement<S>(handle, sql) {
 
@@ -36,6 +38,10 @@ internal abstract class AbstractSqlStatement<S : SqlStatement<S>>(handle: Handle
             applyQueryParameters(it)
             action(it)
         }
+    }
+
+    protected fun resultSetProducer(action: (PreparedStatement) -> ResultSet): ResultSetProducer = object : ResultSetProducer {
+        override fun <R> withResultSet(block: (ResultSet) -> R): R = executeInternal { action(it).use(block) }
     }
 
     protected open fun createStatement(parsedSql: String): PreparedStatement {

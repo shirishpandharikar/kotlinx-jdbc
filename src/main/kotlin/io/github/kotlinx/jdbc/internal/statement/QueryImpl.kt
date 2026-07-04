@@ -1,20 +1,16 @@
 package io.github.kotlinx.jdbc.internal.statement
 
 import io.github.kotlinx.jdbc.Handle
-import io.github.kotlinx.jdbc.result.ResultIterable
 import io.github.kotlinx.jdbc.internal.result.ResultIterableImpl
-import io.github.kotlinx.jdbc.internal.result.ResultSetProducer
+import io.github.kotlinx.jdbc.result.ResultIterable
 import io.github.kotlinx.jdbc.spi.ColumnMapper
 import io.github.kotlinx.jdbc.spi.RowMapper
 import io.github.kotlinx.jdbc.statement.Query
-import java.sql.ResultSet
 
 internal class QueryImpl internal constructor(handle: Handle, sql: String): AbstractSqlStatement<Query>(handle, sql), Query {
 
-    private val resultProducer = object: ResultSetProducer {
-        override fun <R> withResultSet(block: (ResultSet) -> R): R {
-            return executeInternal { it.executeQuery().use { rs -> block(rs) } }
-        }
+    private val resultProducer = resultSetProducer {
+        it.executeQuery()
     }
 
     override fun <T> map(mapper: RowMapper<T>): ResultIterable<T> {

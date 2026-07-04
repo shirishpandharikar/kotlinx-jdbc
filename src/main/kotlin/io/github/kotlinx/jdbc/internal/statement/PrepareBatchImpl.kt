@@ -3,12 +3,10 @@ package io.github.kotlinx.jdbc.internal.statement
 import io.github.kotlinx.jdbc.Handle
 import io.github.kotlinx.jdbc.result.ResultIterable
 import io.github.kotlinx.jdbc.internal.result.ResultIterableImpl
-import io.github.kotlinx.jdbc.internal.result.ResultSetProducer
 import io.github.kotlinx.jdbc.spi.RowMapper
 import io.github.kotlinx.jdbc.spi.SqlArgument
 import io.github.kotlinx.jdbc.statement.PreparedBatch
 import java.sql.PreparedStatement
-import java.sql.ResultSet
 
 internal class PrepareBatchImpl internal constructor(handle: Handle, sql: String): AbstractSqlStatement<PreparedBatch>(handle, sql), PreparedBatch {
 
@@ -16,13 +14,9 @@ internal class PrepareBatchImpl internal constructor(handle: Handle, sql: String
 
     private data class BatchRow(val params: Map<Int, SqlArgument>)
 
-    private val resultProducer = object: ResultSetProducer {
-        override fun <R> withResultSet(block: (ResultSet) -> R): R {
-            return executeInternal {
-                it.executeBatch()
-                it.generatedKeys.use { rs -> block(rs) }
-            }
-        }
+    private val resultSetProducer = resultSetProducer {
+        it.executeBatch()
+        it.generatedKeys
     }
 
     override fun add(): PreparedBatch {
@@ -44,7 +38,7 @@ internal class PrepareBatchImpl internal constructor(handle: Handle, sql: String
 
     override fun <T> executeWithGeneratedKeys(vararg generateKeyColumns: String, mapper: RowMapper<T>): ResultIterable<T> {
         context.useGeneratedKeys(*generateKeyColumns)
-        return ResultIterableImpl(mapper, resultProducer)
+        return ResultIterableImpl(mapper, resultSetProducer)
     }
 
     override fun applyQueryParameters(preparedStatement: PreparedStatement) {
