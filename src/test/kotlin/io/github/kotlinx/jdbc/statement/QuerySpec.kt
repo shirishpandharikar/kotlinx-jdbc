@@ -1,6 +1,8 @@
 package io.github.kotlinx.jdbc.statement
 
 import io.github.kotlinx.jdbc.BaseSpec
+import io.github.kotlinx.jdbc.exception.EmptyResultException
+import io.github.kotlinx.jdbc.exception.TooManyRowsException
 import io.github.kotlinx.jdbc.spi.RowMapper
 import io.github.kotlinx.test.User
 import io.github.kotlinx.test.UserStatus
@@ -208,6 +210,39 @@ class QuerySpec : BaseSpec() {
                             .list()
                     }
                 }.message shouldContain "Missing positional parameter at index 2"
+            }
+
+            should("one() throws TooManyRowsException when more than one row") {
+                shouldThrow<TooManyRowsException> {
+                    dbi.withHandle {
+                        query("SELECT id, name, status, age FROM users").map(userMapper).one()
+                    }
+                }
+            }
+
+            should("one() throws EmptyResultException when no rows") {
+                shouldThrow<EmptyResultException> {
+                    dbi.withHandle {
+                        query("SELECT id, name, status, age FROM users WHERE id = ?")
+                            .bind(1, 9999L).map(userMapper).one()
+                    }
+                }
+            }
+
+            should("oneOrNull() throws TooManyRowsException when more than one row") {
+                shouldThrow<TooManyRowsException> {
+                    dbi.withHandle {
+                        query("SELECT id, name, status, age FROM users").map(userMapper).one()
+                    }
+                }
+            }
+
+            should("oneOrNull() returns null when no rows") {
+                val result = dbi.withHandle {
+                    query("SELECT id, name, status, age FROM users WHERE id = ?")
+                        .bind(1, 9999L).map(userMapper).oneOrNull()
+                }
+                result shouldBe null
             }
         }
     }
