@@ -1,5 +1,7 @@
 package io.github.kotlinx.jdbc.internal.result
 
+import io.github.kotlinx.jdbc.exception.EmptyResultException
+import io.github.kotlinx.jdbc.result.ResultIterable
 import io.github.kotlinx.jdbc.spi.RowMapper
 
 internal class ResultIterableImpl<T>(private val mapper: RowMapper<T>, private val resultSetProducer: ResultSetProducer) : ResultIterable<T> {
@@ -14,25 +16,13 @@ internal class ResultIterableImpl<T>(private val mapper: RowMapper<T>, private v
         }
     }
 
-    override fun first(): T {
-        return resultSetProducer.withResultSet {
-            checkElement(it.next()) { "Expected at least one row but found none" }
-            val result = mapper.map(it)
-            checkElement(!it.next()) { "Expected exactly one row but found more" }
-            result
-        }
+    override fun first(): T = resultSetProducer.withResultSet {
+        if (!it.next()) throw EmptyResultException("Expected at least one row but found none")
+        mapper.map(it)
     }
 
-    override fun firstOrNull(): T? {
-        return resultSetProducer.withResultSet {
-            if (!it.next()) {
-                null
-            } else {
-                val result = mapper.map(it)
-                check(!it.next()) { "Expected exactly one row but found more" }
-                result
-            }
-        }
+    override fun firstOrNull(): T? = resultSetProducer.withResultSet {
+        if (it.next()) mapper.map(it) else null
     }
 
     override fun <K> associateBy(keySelector: (T) -> K): Map<K, T> = associateBy(keySelector) { it }
@@ -46,10 +36,6 @@ internal class ResultIterableImpl<T>(private val mapper: RowMapper<T>, private v
                 }
             }
         }
-    }
-
-    private inline fun checkElement(value: Boolean, lazyMessage: () -> Any) {
-        if (!value) throw NoSuchElementException(lazyMessage().toString())
     }
 
 }

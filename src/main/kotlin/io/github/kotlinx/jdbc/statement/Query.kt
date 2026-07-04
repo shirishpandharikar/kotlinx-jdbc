@@ -1,6 +1,6 @@
 package io.github.kotlinx.jdbc.statement
 
-import io.github.kotlinx.jdbc.internal.result.ResultIterable
+import io.github.kotlinx.jdbc.result.ResultIterable
 import io.github.kotlinx.jdbc.internal.statement.SqlStatement
 import io.github.kotlinx.jdbc.spi.ColumnMapper
 import io.github.kotlinx.jdbc.spi.RowMapper

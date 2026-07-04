@@ -1,7 +1,7 @@
 package io.github.kotlinx.jdbc.internal.statement
 
 import io.github.kotlinx.jdbc.Handle
-import io.github.kotlinx.jdbc.internal.result.ResultIterable
+import io.github.kotlinx.jdbc.result.ResultIterable
 import io.github.kotlinx.jdbc.internal.result.ResultIterableImpl
 import io.github.kotlinx.jdbc.internal.result.ResultSetProducer
 import io.github.kotlinx.jdbc.spi.ColumnMapper
