@@ -1,0 +1,23 @@
+package io.github.kotlinx.jdbc.internal.argument
+
+import io.github.kotlinx.jdbc.spi.SqlArgument
+import io.github.kotlinx.jdbc.spi.SqlArgumentFactory
+import java.math.BigDecimal
+
+internal class EssentialArgumentFactory: SqlArgumentFactory {
+    override fun create(value: Any): SqlArgument? {
+        return when (value) {
+            is Boolean -> SqlArgument { position, pstmt -> pstmt.setBoolean(position, value) }
+            is Byte -> SqlArgument { position, pstmt -> pstmt.setByte(position, value) }
+            is Char -> SqlArgument { position, pstmt -> pstmt.setString(position, value.toString()) }
+            is Short -> SqlArgument { position, pstmt -> pstmt.setShort(position, value) }
+            is Int -> SqlArgument { position, pstmt -> pstmt.setInt(position, value) }
+            is String -> SqlArgument { position, pstmt -> pstmt.setString(position, value) }
+            is Long -> SqlArgument { position, pstmt -> pstmt.setLong(position, value) }
+            is Double -> SqlArgument { position, pstmt -> pstmt.setDouble(position, value) }
+            is Float -> SqlArgument { position, pstmt -> pstmt.setFloat(position, value) }
+            is BigDecimal -> SqlArgument { position, pstmt -> pstmt.setBigDecimal(position, value) }
+            else -> null
+        }
+    }
+}
